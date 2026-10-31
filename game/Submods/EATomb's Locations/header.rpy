@@ -13,7 +13,7 @@ init -989 python:
         store.sup_utils.SubmodUpdater(
             submod="EATomb的房间包",
             user_name="EATomb-MAS-Submods",
-            repository_name="EATomb-Location-Packs",
+            repository_name="EATomb-Location-Pack",
             update_dir="",
             attachment_id=None
         )
