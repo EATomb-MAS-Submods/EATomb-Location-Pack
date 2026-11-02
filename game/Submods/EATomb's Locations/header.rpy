@@ -4,7 +4,7 @@ init -990 python:
         author="EATomb",
         name="EATomb的房间包",
         description="这个子模组添加了由EATomb制作的所有房间, 目前正在持续更新中.",
-        version="1.0.0"
+        version="1.1.0"
     )
 
 # 注册子模组更新器
