@@ -117,19 +117,24 @@ init 100 python in mas_cardgames:
         "mod_assets/games/nou/desks/pcr_black_marble.png"
     )
 
-default pcr_table_other = "方形"
+default persistent.pcr_table_current = "pcr_round"
 
 init -2 python in mas_background:
     PCR_TABLE_ROUND = "pcr_round"
-    # PCR_TABLE_SQUARE = "pcr_square"
+    PCR_TABLE_SQUARE = "pcr_square"
+    PCR_TABLES = (PCR_TABLE_ROUND, PCR_TABLE_SQUARE)
 
-    # def pcr_switch_table():
-    #     if store.monika_chr.tablechair.table == PCR_TABLE_ROUND:
-    #         store.monika_chr.tablechair.table = PCR_TABLE_SQUARE
-    #         store.pcr_table_other = "圆形"
-    #     else:
-    #         store.monika_chr.tablechair.table = PCR_TABLE_ROUND
-    #         store.pcr_table_other = "方形"
+    def pcr_switch_table():
+        if store.monika_chr.tablechair.table == PCR_TABLE_ROUND:
+            store.monika_chr.tablechair.table = PCR_TABLE_SQUARE
+            store.pcr_table_other = "圆形"
+        else:
+            store.monika_chr.tablechair.table = PCR_TABLE_ROUND
+            store.pcr_table_other = "方形"
+
+
+        store.persistent.pcr_table_current = store.monika_chr.tablechair.table
+
 
 
     def _purple_cozy_room_entry(_old, **kwargs):
@@ -143,11 +148,15 @@ init -2 python in mas_background:
             if not store.mas_inEVL("purple_cozy_room_switch_dlg"):
                 store.pushEvent("purple_cozy_room_switch_dlg")
 
-        store.monika_chr.tablechair.table = PCR_TABLE_ROUND
+        saved_table = store.persistent.pcr_table_current
+        if saved_table not in PCR_TABLES:
+            saved_table = PCR_TABLE_ROUND
+
+        store.monika_chr.tablechair.table = saved_table
         store.monika_chr.tablechair.chair = "PCR"
 
         # TODO: 进入pcr后解锁换桌子话题
-        # store.mas_unlockEVL("tomb_pcr_change_table", "EVE")
+        store.mas_unlockEVL("tomb_pcr_change_table", "EVE")
 
         store.pcr_table_other = (
         "方形" if store.monika_chr.tablechair.table == PCR_TABLE_ROUND else "圆形"
@@ -167,7 +176,7 @@ init -2 python in mas_background:
             store.pushEvent("return_switch_dlg")
 
         # TODO: 离开pcr后锁上换桌子话题
-        # store.mas_lockEVL("tomb_pcr_change_table", "EVE")
+        store.mas_lockEVL("tomb_pcr_change_table", "EVE")
 
 
 label purple_cozy_room_switch_dlg:
@@ -194,33 +203,33 @@ label return_switch_dlg:
     return
 
 
-# # TODO: 询问player是否更换桌子
-# init 5 python:
-#     addEvent(
-#         Event(
-#             persistent.event_database,
-#             eventlabel="tomb_pcr_change_table",
-#             category=["地点"],
-#             prompt="你可以换张[pcr_table_other]的桌子吗?",
-#             pool=True,
-#             unlocked=False,
-#             rules={"no_unlock": None},
-#             aff_range=(mas_aff.ENAMORED, None)
-#         ),
-#     )
+# TODO: 询问player是否更换桌子
+init 5 python:
+    addEvent(
+        Event(
+            persistent.event_database,
+            eventlabel="tomb_pcr_change_table",
+            category=["地点"],
+            prompt="你可以换张[pcr_table_other]的桌子吗?",
+            pool=True,
+            unlocked=False,
+            rules={"no_unlock": None},
+            aff_range=(mas_aff.ENAMORED, None)
+        ),
+    )
 
-# label tomb_pcr_change_table:
-#     m 1eub "好啊, [player]."
-#     m 1hua "稍微等一下哦~"
+label tomb_pcr_change_table:
+    m 1eub "好啊, [player]."
+    m 1hua "稍微等一下哦~"
 
-#     show monika 1hua at lhide
-#     pause 0.8
-#     hide monika
+    show monika at rs32 zorder MAS_MONIKA_Z
+    hide monika
+    pause 2.5
+    
+    $ store.mas_background.pcr_switch_table()
 
-#     $ store.mas_background.pcr_switch_table()
+    show monika at ls32 zorder MAS_MONIKA_Z
 
-#     show monika 1eua at ls32 zorder MAS_MONIKA_Z
-
-#     m 3hub "好啦!"
-#     return
+    m 3hub "好啦!"
+    return
 
